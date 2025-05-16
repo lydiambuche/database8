@@ -1,0 +1,147 @@
+-- This SQL script creates a database for a clinic booing system
+-- and includes tables for patients, doctors, appointments, details of treatment and payments
+CREATE DATABASE ClinicBooking;
+USE ClinicBooking;
+-- create table patients
+CREATE TABLE patients (
+    patient_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    date_of_birth DATE,
+    gender VARCHAR(10),
+    contact_info VARCHAR(100)
+);
+-- create table doctors
+CREATE TABLE doctors (
+    doctor_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    specialty VARCHAR(100),
+    contact_info VARCHAR(100)
+);
+-- create table appointments
+CREATE TABLE appointments (
+    appointment_id INT PRIMARY KEY AUTO_INCREMENT,
+    patient_id INT,
+    doctor_id INT,
+    appointment_date DATETIME,
+    status VARCHAR(50),
+    FOREIGN KEY (patient_id) REFERENCES patients(patient_id),
+    FOREIGN KEY (doctor_id) REFERENCES doctors(doctor_id)
+);
+-- create table treatments
+CREATE TABLE treatments (
+    treatment_id INT PRIMARY KEY AUTO_INCREMENT,
+    appointment_id INT,
+    description TEXT,
+    cost DECIMAL(10, 2),
+    FOREIGN KEY (appointment_id) REFERENCES appointments(appointment_id)
+);
+-- create table payments
+CREATE TABLE payments (
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
+    appointment_id INT,
+    amount_paid DECIMAL(10, 2),
+    payment_date DATETIME,
+    method VARCHAR(50),
+    FOREIGN KEY (appointment_id) REFERENCES appointments(appointment_id)
+);
+-- Add a doctor
+INSERT INTO doctors (name, specialty, contact_info)
+VALUES ('Dr. Jane Smith', 'Cardiology', 'dr.jane@clinic.com');
+-- Add a patient
+INSERT INTO patients (name, date_of_birth, gender, contact_info)
+VALUES ('John Doe', '1985-06-15', 'Male', 'john.doe@email.com');
+
+-- Create an appointment
+INSERT INTO appointments (patient_id, doctor_id, appointment_date, status)
+VALUES (1, 1, '2025-06-01 10:00:00', 'Scheduled');
+
+-- Add treatment for that appointment
+INSERT INTO treatments (appointment_id, description, cost)
+VALUES (1, 'ECG Test', 50.00);
+
+-- Record payment
+INSERT INTO payments (appointment_id, amount_paid, payment_date, method)
+VALUES (1, 50.00, '2025-06-01 10:15:00', 'Cash');
+
+SELECT * FROM appointments WHERE appointment_id = 1;
+INSERT INTO patients (name, date_of_birth, gender, contact_info)
+VALUES ('John Doe', '1990-01-01', 'Male', '0712345678');
+
+INSERT INTO doctors (name, specialization, contact_info)
+VALUES ('Dr. Jane Smith', 'Cardiologist', '0798765432');
+
+INSERT INTO appointments (patient_id, doctor_id, appointment_date, status)
+VALUES (1, 1, '2025-06-01 10:00:00', 'Scheduled');
+
+INSERT INTO treatments (appointment_id, description, cost)
+VALUES (1, 'ECG Test', 50.00);
+
+
+DESCRIBE doctors;
+ALTER TABLE doctors ADD COLUMN specialization VARCHAR(100);
+
+INSERT INTO doctors (name, specialization, contact_info)
+VALUES ('Dr. Jane Smith', 'Cardiologist', '0798765432');
+
+SELECT * FROM appointments WHERE appointment_id = 1;
+
+SELECT * FROM patients;
+SELECT * FROM doctors;
+
+SELECT * FROM appointments WHERE appointment_id = 1;
+
+-- query for list all appointments with patient and doctor names
+SELECT a.appointment_id, p.name AS patient, d.name AS doctor, a.appointment_date, a.status
+FROM appointments a
+JOIN patients p ON a.patient_id = p.patient_id
+JOIN doctors d ON a.doctor_id = d.doctor_id;
+
+-- query to Check payment status for appointments
+SELECT a.appointment_id, p.name AS patient, SUM(t.cost) AS total_cost, COALESCE(SUM(pay.amount_paid), 0) AS total_paid
+FROM appointments a
+JOIN patients p ON a.patient_id = p.patient_id
+LEFT JOIN treatments t ON a.appointment_id = t.appointment_id
+LEFT JOIN payments pay ON a.appointment_id = pay.appointment_id
+GROUP BY a.appointment_id, p.name;
+
+ -- Add Constraints for Data Integrity
+-- query to Ensure cost values are positive
+ALTER TABLE treatments
+ADD CONSTRAINT chk_positive_cost CHECK (cost > 0);
+
+  -- query to  prevent empty status in appointments
+ALTER TABLE appointments
+MODIFY status VARCHAR(50) NOT NULL;
+
+-- query to Ensure valid payment amount
+ALTER TABLE payments
+ADD CONSTRAINT chk_positive_amount CHECK (amount > 0);
+
+DESCRIBE payments;
+ALTER TABLE payments
+ADD CONSTRAINT chk_positive_payment CHECK (payment_amount > 0);
+
+ALTER TABLE payments
+ADD CONSTRAINT chk_positive_amount CHECK (amount > 0);
+
+ALTER TABLE payments
+ADD CONSTRAINT chk_positive_amount CHECK (amount_paid > 0);
+
+ALTER TABLE appointments
+ADD CONSTRAINT uniq_patient_datetime UNIQUE (patient_id, appointment_date);
+
+USE clinicbooking;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
